@@ -38,7 +38,8 @@ def get_next_item(window):
     cur.execute(
         """SELECT estate.id, estate.name, estate.key_id, estate.secret_key, """ +
         """       item.hostname, item.due FROM estate JOIN item ON estate.id = item.estate_id """ +
-        """WHERE item.due < (CURRENT_DATE + INTERVAL '""" + str(window) + """ days') """
+        """WHERE item.processing = false AND """ +
+        """item.due < (CURRENT_DATE + INTERVAL '""" + str(window) + """ days') """
         """ORDER BY item.due ASC LIMIT 1""")
 
     rows = cur.fetchall()

@@ -17,6 +17,7 @@ CREATE TABLE item
    hostname character varying(500) NOT NULL,
    due timestamp with time zone NOT NULL,
    estate_id character varying(100) NOT NULL,
+   processing boolean NOT NULL,
    CONSTRAINT "PK_HOSTNAME" PRIMARY KEY (hostname)
 )
 WITH (
