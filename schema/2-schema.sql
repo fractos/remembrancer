@@ -15,7 +15,7 @@ GRANT ALL ON TABLE estate TO remembrancer_role;
 CREATE TABLE item
 (
    hostname character varying(500) NOT NULL,
-   due timestamp with time zone NOT NULL,
+   due date NOT NULL,
    estate_id character varying(100) NOT NULL,
    processing boolean NOT NULL,
    CONSTRAINT "PK_HOSTNAME" PRIMARY KEY (hostname)

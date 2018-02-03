@@ -1,5 +1,7 @@
 import time
+import os
 import psycopg2
+from subprocess import run, CalledProcessError
 from logzero import logger
 import settings
 
@@ -61,6 +63,23 @@ def renew(item):
     logger.info('item: ')
     for k, v in item.items():
         logger.info('  %s: %s', k, str(v))
+
+    logger.info('renewing %s on %s (%s) which is due %s' %
+                (item['item_hostname'], item['estate_name'],
+                 item['estate_id'], item['item_due']))
+
+    # to renew an item:
+    #   create shell with environment variables set for the estate
+    os.environ['AWS_ACCESS_KEY_ID'] = item['estate_key_id']
+    os.environ['AWS_SECRET_ACCESS_KEY'] = item['estate_secret_key']
+    os.environ['DOMAIN'] = item['item_hostname']
+
+    try:
+        run(args=['/opt/certbot/route53.sh'],
+            check=True)
+    except CalledProcessError as cpe:
+        logger.error("exception: returned code was %d" % cpe.returncode)
+
     return
 
 logger.info('remembrancer starting...')
