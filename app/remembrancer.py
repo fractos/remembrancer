@@ -20,18 +20,23 @@ def disconnect():
     postgres_connection.close()
 
 def lifecycle():
-    connect()
-    # get next soonest item that is fewer than X days away
-    item = get_next_item(window=settings.GUARD_WINDOW_DAYS)
+    while True:
+        connect()
+        # get next soonest item that is fewer than X days away
+        item = get_next_item(window=settings.GUARD_WINDOW_DAYS)
 
-    if item is not None:
-        renew(item)
+        if item is not None:
+            renew(item)
 
-    disconnect()
+        disconnect()
 
-    logger.info('sleeping for %s seconds' % str(settings.SLEEP_SECONDS))
+        if settings.SLEEP_SECONDS > 0:
+            logger.info('sleeping for %s seconds' % str(settings.SLEEP_SECONDS))
 
-    time.sleep(settings.SLEEP_SECONDS)
+            time.sleep(settings.SLEEP_SECONDS)
+        else:
+            break
+    logger.info('lifecycle ending.')
 
 def get_next_item(window):
 
@@ -41,8 +46,8 @@ def get_next_item(window):
         """SELECT estate.id, estate.name, estate.key_id, estate.secret_key, """ +
         """       item.hostname, item.due FROM estate JOIN item ON estate.id = item.estate_id """ +
         """WHERE item.processing = false AND """ +
-        """item.due < (CURRENT_DATE + INTERVAL '""" + str(window) + """ days') """
-        """ORDER BY item.due ASC LIMIT 1""")
+        """item.due < (CURRENT_DATE + INTERVAL '%s days') """
+        """ORDER BY item.due ASC LIMIT 1""", [window])
 
     rows = cur.fetchall()
 
