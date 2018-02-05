@@ -2,27 +2,28 @@ FROM python:3-alpine
 
 VOLUME [ "/etc/letsencrypt" ]
 
+ENV AWS_REGION region
 ENV AWS_ACCESS_KEY_ID placeholder
 ENV AWS_SECRET_ACCESS_KEY placeholder
 
 ENV SSM_KEY_PREFIX remembrancer_
+ENV KMS_KEY_ALIAS remembrancer
 
-ENV DATABASE_NAME remembrancer
-ENV DATABASE_HOST postgres
-ENV DATABASE_USERNAME remembrancer
-ENV DATABASE_PASSWORD password
+ENV DATABASE_TABLE remembrancer
 
-ENV GUARD_WINDOW_DAYS 3
+ENV GUARD_WINDOW_DAYS 7
 ENV SLEEP_SECONDS 60
 
 ENV EMAIL email_for_letsencrypt
 
+ENV SLACK_WEBHOOK_URL ""
+ENV ACTIVITY_STREAM_URL ""
+
 RUN apk add --update --no-cache --virtual=run-deps \
-    openssl \
+    openssl-dev \
     ca-certificates \
     certbot \
     tzdata \
-    postgresql-dev \
     gcc \
     python3-dev \
     musl-dev \
@@ -35,8 +36,9 @@ WORKDIR /opt/remembrancer
 COPY certbot /opt/certbot
 RUN chmod +x /opt/certbot/route53.sh
 
-COPY run_remembrancer.sh /opt/remembrancer/
-RUN chmod +x /opt/remembrancer/run_remembrancer.sh
+COPY *.sh /opt/remembrancer/
+
+RUN chmod +x /opt/remembrancer/*.sh
 
 CMD /opt/remembrancer/run_remembrancer.sh
 
